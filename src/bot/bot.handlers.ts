@@ -1,9 +1,11 @@
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
+const port = Number(process.env.ENDPOINTS_PORT);
+
 // body fetch builder
 async function bodyFetchBuilder(path: string, method: HttpMethod, body: Record<string, string | number | boolean | null>) {
 
-    const res = await fetch(`http://localhost:2109${path}`, {
+    const res = await fetch(`http://localhost:${port}${path}`, {
         method: method,
         headers: { 'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.API_SECRET}`
@@ -23,7 +25,7 @@ async function bodyFetchBuilder(path: string, method: HttpMethod, body: Record<s
 // no-body fetch builer
 async function noBodyFetchBuilder(path: string, method: HttpMethod) {
 
-    const res = await fetch(`http://localhost:2109${path}`, {
+    const res = await fetch(`http://localhost:${port}${path}`, {
         method: method,
         headers: { 'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.API_SECRET}`

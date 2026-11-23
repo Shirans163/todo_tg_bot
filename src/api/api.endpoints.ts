@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json())
 app.use(middlewares.authMiddleware)
 
-const port = 2109;
+const port = Number(process.env.ENDPOINTS_PORT);
 
 // start server
 async function startServer() {

@@ -1,0 +1,7 @@
+.env
+.envrc
+flake.lock
+flake.nix
+.direnv/
+.pgdata/
+node_modules/

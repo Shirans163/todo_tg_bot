@@ -79,8 +79,8 @@ bot.hears('Просмотреть задачи', async (ctx: MyContext) => {
             else if ( dbRes.data[i].completed === 'in progress' ) { status = '🟡' }
             else if ( dbRes.data[i].completed === 'false' ) { status = '🔴' };
             i !== (dbRes.data.length - 1)
-            ? response.push(`<b>#${dbRes.data[i].nuid} | ${status} - ${escapeHtml(dbRes.data[i].title)}</b>\n${dbRes.data[i].description !== null ? escapeHtml(dbRes.data[i].description) : ''}\n`)
-            : response.push(`<b>#${dbRes.data[i].nuid} | ${status} - ${escapeHtml(dbRes.data[i].title)}</b>\n${dbRes.data[i].description !== null ? escapeHtml(dbRes.data[i].description) : ''}`);
+            ? response.push(`<b>#${dbRes.data[i].task_number} | ${status} - ${escapeHtml(dbRes.data[i].title)}</b>\n${dbRes.data[i].description !== null ? escapeHtml(dbRes.data[i].description) : ''}\n`)
+            : response.push(`<b>#${dbRes.data[i].task_number} | ${status} - ${escapeHtml(dbRes.data[i].title)}</b>\n${dbRes.data[i].description !== null ? escapeHtml(dbRes.data[i].description) : ''}`);
         };
 
         await ctx.reply(response.join(''), {

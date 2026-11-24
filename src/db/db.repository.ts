@@ -90,11 +90,24 @@ async function getAllTasks(userId: string): Promise<tasksWithNumbering[] | []> {
 };
 
 // update task status (patch)
-async function updateStatusTask(status: statusType, userId: string, taskId: number ): Promise<iTasks | undefined> {
+async function updateStatusTask(status: statusType, userId: string, taskId: number): Promise<iTasks | undefined> {
     const res = await db.query(
-        `UPDATE tasks SET completed = $1
-        WHERE user_id = $2 AND id = $3
-        RETURNING *`,
+        `WITH numbered_tasks AS (
+            SELECT
+                id,
+                ROW_NUMBER() OVER (ORDER BY id) AS task_number
+            FROM tasks
+            WHERE user_id = $2
+        )
+        UPDATE tasks
+        SET completed = $1
+        WHERE id = (
+            SELECT id
+            FROM numbered_tasks
+            WHERE task_number = $3
+        )
+        AND user_id = $2
+        RETURNING *;`,
         [status, userId, taskId]
     );
 

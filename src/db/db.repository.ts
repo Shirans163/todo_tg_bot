@@ -68,7 +68,7 @@ async function getTask(userId: string, taskId: number): Promise<tasksWithNumberi
             FROM tasks
             WHERE user_id = $1
         ) AS numbered_tasks
-        AND id = $2;`,
+        WHERE id = $2;`,
         [userId, taskId]
     );
 

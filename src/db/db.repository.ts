@@ -16,6 +16,8 @@ interface iTasks {
     created_at: Date;
 };
 
+type tasksWithNumbering = {task_number: number} & iTasks;
+
 // tables init
 async function initDatabase(): Promise<void> {
 
@@ -55,14 +57,14 @@ async function addTask(userId: string, title: string, description: string | null
 };
 
 // get task (get)
-async function getTask(userId: string, taskId: number): Promise<iTasks | undefined> {
+async function getTask(userId: string, taskId: number): Promise<tasksWithNumbering | undefined> {
     const res = await db.query(
         `SELECT * FROM (
             SELECT
                 *,
                 ROW_NUMBER() OVER (
                     ORDER BY id
-                ) AS nuid
+                ) AS task_number
             FROM tasks
         ) AS numbered_tasks
         WHERE user_id = $1
@@ -74,14 +76,14 @@ async function getTask(userId: string, taskId: number): Promise<iTasks | undefin
 };
 
 // get all task (get)
-async function getAllTasks(userId: string): Promise<iTasks[] | []> {
+async function getAllTasks(userId: string): Promise<tasksWithNumbering[] | []> {
     const res = await db.query(
         `SELECT * FROM (
             SELECT
                 *,
                 ROW_NUMBER() OVER (
                     ORDER BY id
-                ) AS nuid
+                ) AS task_number
             FROM tasks
         ) AS numbered_tasks
         WHERE user_id = $1;`,
@@ -104,12 +106,12 @@ async function updateStatusTask(status: statusType, userId: string, taskId: numb
 };
 
 // delete task (delete)
-async function deleteTask(userId: string, taskId: number): Promise<iTasks | undefined> {
+async function deleteTask(userId: string, taskId: number): Promise<tasksWithNumbering | undefined> {
     const res = await db.query(
         `WITH numbered_tasks AS (
             SELECT
                 id,
-                ROW_NUMBER() OVER (ORDER BY id) AS nuid
+                ROW_NUMBER() OVER (ORDER BY id) AS task_number
             FROM tasks
             WHERE user_id = $1
         )
@@ -117,9 +119,10 @@ async function deleteTask(userId: string, taskId: number): Promise<iTasks | unde
         WHERE id = (
             SELECT id
             FROM numbered_tasks
-            WHERE nuid = $2
+            WHERE task_number = $2
         )
-        AND user_id = $1;`,
+        AND user_id = $1
+        RETURNING *;`,
         [userId, taskId]
     );
 

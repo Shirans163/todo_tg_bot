@@ -57,8 +57,16 @@ async function addTask(userId: string, title: string, description: string | null
 // get task (get)
 async function getTask(userId: string, taskId: number): Promise<iTasks | undefined> {
     const res = await db.query(
-        `SELECT * FROM tasks
-        WHERE user_id = $1 AND id = $2`,
+        `SELECT * FROM (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    ORDER BY id
+                ) AS nuid
+            FROM tasks
+        ) AS numbered_tasks
+        WHERE user_id = $1
+        AND id = $2;`,
         [userId, taskId]
     );
 
@@ -68,8 +76,15 @@ async function getTask(userId: string, taskId: number): Promise<iTasks | undefin
 // get all task (get)
 async function getAllTasks(userId: string): Promise<iTasks[] | []> {
     const res = await db.query(
-        `SELECT * FROM tasks
-        WHERE user_id = $1`,
+        `SELECT * FROM (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    ORDER BY id
+                ) AS nuid
+            FROM tasks
+        ) AS numbered_tasks
+        WHERE user_id = $1;`,
         [userId]
     );
 
@@ -91,9 +106,20 @@ async function updateStatusTask(status: statusType, userId: string, taskId: numb
 // delete task (delete)
 async function deleteTask(userId: string, taskId: number): Promise<iTasks | undefined> {
     const res = await db.query(
-        `DELETE FROM tasks
-        WHERE user_id = $1 AND id = $2
-        RETURNING *`,
+        `WITH numbered_tasks AS (
+            SELECT
+                id,
+                ROW_NUMBER() OVER (ORDER BY id) AS nuid
+            FROM tasks
+            WHERE user_id = $1
+        )
+        DELETE FROM tasks
+        WHERE id = (
+            SELECT id
+            FROM numbered_tasks
+            WHERE nuid = $2
+        )
+        AND user_id = $1;`,
         [userId, taskId]
     );
 

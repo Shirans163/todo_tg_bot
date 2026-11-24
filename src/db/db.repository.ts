@@ -66,8 +66,8 @@ async function getTask(userId: string, taskId: number): Promise<tasksWithNumberi
                     ORDER BY id
                 ) AS task_number
             FROM tasks
+            WHERE user_id = $1
         ) AS numbered_tasks
-        WHERE user_id = $1
         AND id = $2;`,
         [userId, taskId]
     );
@@ -78,14 +78,10 @@ async function getTask(userId: string, taskId: number): Promise<tasksWithNumberi
 // get all task (get)
 async function getAllTasks(userId: string): Promise<tasksWithNumbering[] | []> {
     const res = await db.query(
-        `SELECT * FROM (
-            SELECT
-                *,
-                ROW_NUMBER() OVER (
-                    ORDER BY id
-                ) AS task_number
-            FROM tasks
-        ) AS numbered_tasks
+        `SELECT
+            *,
+            ROW_NUMBER() OVER (ORDER BY id) AS task_number
+        FROM tasks
         WHERE user_id = $1;`,
         [userId]
     );
